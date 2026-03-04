@@ -4,54 +4,52 @@ async function startExtraction() {
     const oIn = document.getElementById('orderID').value.trim();
     const uIn = document.getElementById('user').value.trim().toLowerCase();
 
+    // المشكلة 4: حد الاستخدام (3 مرات لكل رقم طلب)
+    let usageCount = localStorage.getItem('usage_' + oIn) || 0;
+    if (parseInt(usageCount) >= 3) {
+        alert("عذراً، لقد تجاوزت الحد الأقصى لاستخدام رقم هذا الطلب (3 مرات).");
+        return;
+    }
+
     try {
         const res = await fetch(csvUrl);
         const data = await res.text();
-        
-        // تقسيم البيانات لأسطر
         const rows = data.split(/\r?\n/).map(row => row.split(","));
         
         let secret = null;
 
-        // البحث في كل الأسطر
+        // المشكلة 2: التأكد أن اليوزر ورقم الطلب في نفس السطر
         for (let i = 1; i < rows.length; i++) {
-            const columns = rows[i];
-            
-            // التأكد أن السطر يحتوي على بيانات كافية
-            if (columns.length < 3) continue; 
+            const rowOrderID = rows[i][0]?.trim();
+            const rowUsername = rows[i][1]?.trim().toLowerCase();
+            const rowSecret = rows[i][2]?.trim();
 
-            const rowOrderID = columns[0]?.trim();
-            const rowUsername = columns[1]?.trim().toLowerCase();
-            const rowSecret = columns[2]?.trim();
-
-            // مطابقة رقم الطلب واليوزر (حتى لو كان في سطر بعيد)
             if (rowOrderID === oIn && rowUsername === uIn && rowSecret) {
-                secret = rowSecret.replace(/=/g, ''); 
+                secret = rowSecret.replace(/=/g, ''); // المشكلة 1: تنظيف السر
                 break;
             }
         }
 
         if (secret) {
+            // تحديث عدد الاستخدامات
+            usageCount++;
+            localStorage.setItem('usage_' + oIn, usageCount);
+
             document.getElementById('resultArea').style.display = 'block';
-            if (window.otpTimer) clearInterval(window.otpTimer);
             
-            const updateUI = () => {
-                document.getElementById('steamCode').innerText = generateSteamCode(secret);
-                let seconds = 30 - (Math.floor(Date.now() / 1000) % 30);
-                document.getElementById('timerBar').innerText = "يتحدث الكود خلال: " + seconds + " ثانية";
-            };
+            // المشكلة 3: توليد كود واحد ثابت (بدون setInterval)
+            document.getElementById('steamCode').innerText = generateSteamCode(secret);
+            document.getElementById('timerBar').innerText = `عدد مرات الاستخراج المتبقية لهذا الطلب: ${3 - usageCount}`;
             
-            updateUI();
-            window.otpTimer = setInterval(updateUI, 1000);
         } else {
-            alert("بيانات غير متطابقة! تأكد أن رقم الطلب واليوزر صحيحين في الجدول.");
+            alert("بيانات غير متطابقة! تأكد من أن رقم الطلب واليوزر في نفس السطر بالجدول.");
         }
     } catch (e) {
-        alert("خطأ في الاتصال بالجدول!");
+        alert("خطأ في جلب البيانات من الجدول.");
     }
 }
 
-// دالة التوليد (ثابتة لا تتغير)
+// محرك التوليد الأساسي
 function generateSteamCode(secret) {
     const b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     let bin = '';
