@@ -1,50 +1,48 @@
 :root {
-    --hn-dark-blue: #09131a; /* لون المربع أزرق غامق جداً وغير شفاف */
-    --hn-bg-blue: #0b1e2d;   /* لون خلفية الصفحة أزرق مريح للعين */
-    --hn-light-blue: #66c0f4; /* لون التمييز */
-    --hn-text-white: #ffffff;
+    --hn-main-bg: #0b1e2d;   /* لون خلفية الصفحة أزرق سادة */
+    --hn-box-bg: #09131a;    /* لون المربع أزرق غامق جداً وغير شفاف */
+    --hn-input-bg: #000000;  /* لون الحقول أسود بالكامل */
+    --hn-light-blue: #66c0f4; /* لون النصوص والحدود الزرقاء */
 }
 
 body {
-    background-color: var(--hn-bg-blue);
-    color: var(--hn-text-white);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--hn-main-bg); /* حذفنا رابط الصورة نهائياً */
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
 }
 
 .container {
-    background-color: var(--hn-dark-blue);
+    background-color: var(--hn-box-bg);
     padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* ظل خفيف للفصل */
+    border-radius: 15px;
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
     text-align: center;
-    border: 1px solid rgba(255,255,255,0.05); /* إطار نحيف جداً */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 h2 {
     color: var(--hn-light-blue);
-    margin-bottom: 25px;
-    font-size: 22px;
+    margin-bottom: 30px;
 }
 
 input {
     width: 100%;
-    padding: 14px;
-    margin-bottom: 12px;
-    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: var(--hn-input-bg);
     border: 1px solid #1a2a38;
-    background-color: #000000; /* الحقول سوداء بالكامل كما طلبت */
-    color: var(--hn-text-white);
+    border-radius: 8px;
+    color: white;
+    text-align: center;
     box-sizing: border-box;
     outline: none;
-    font-size: 15px;
-    text-align: center;
 }
 
 input:focus {
@@ -53,42 +51,30 @@ input:focus {
 
 button {
     width: 100%;
-    padding: 15px;
+    padding: 16px;
     background: linear-gradient(to right, #47bfff, #1a44c2);
     border: none;
     color: white;
     font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
-    border-radius: 6px;
-    margin-top: 10px;
     font-size: 16px;
-}
-
-button:hover {
-    opacity: 0.9;
 }
 
 #result {
     margin-top: 25px;
-    font-size: 48px;
+    font-size: 45px;
     color: var(--hn-light-blue);
-    font-weight: 900;
-    letter-spacing: 8px;
-    display: none;
-    background-color: rgba(0,0,0,0.4);
+    font-weight: bold;
+    background: rgba(0,0,0,0.3);
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px dashed var(--hn-light-blue);
+    display: none;
 }
 
 #attemptsCounter {
-    margin-top: 15px;
+    margin-top: 20px;
     font-size: 13px;
-    color: #666; /* لون هادي للعداد */
-}
-
-.footer-text {
-    margin-top: 25px;
-    font-size: 12px;
-    color: #444;
+    color: #555;
 }
