@@ -3,30 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استخراج كود Steam Guard</title>
+    <title>بوابة أكواد متجر HN</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <style>
-        :root { --steam-blue: #1b2838; --steam-light-blue: #66c0f4; --steam-dark: #101822; }
-        body { background: var(--steam-dark); color: white; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { background: var(--steam-blue); padding: 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        h2 { color: var(--steam-light-blue); margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #2a475e; background: #0b1118; color: white; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--steam-light-blue); }
-        button { width: 100%; padding: 15px; background: linear-gradient(to right, #47bfff, #1a44c2); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 15px; font-size: 16px; }
-        button:hover { opacity: 0.9; }
-        #result { margin-top: 25px; font-size: 50px; color: var(--steam-light-blue); font-weight: bold; letter-spacing: 10px; display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px dashed var(--steam-light-blue); }
-        .footer-text { margin-top: 20px; font-size: 12px; color: #888; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h2>بوابة أكواد Steam</h2>
+        <h2>بوابة أكواد متجر HN</h2>
+        
         <input type="text" id="orderID" placeholder="أدخل رقم الطلب (Order ID)">
         <input type="text" id="username" placeholder="أدخل اسم المستخدم (Username)">
         <button onclick="processRequest()">استخراج الكود الآن</button>
         
         <div id="result">-----</div>
+        
+        <div id="attemptsCounter">المحاولات المتبقية: 3</div>
         
         <p class="footer-text">تأكد من إدخال البيانات كما هي في الفاتورة</p>
     </div>
