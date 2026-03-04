@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة أكواد متجر HN</title>
+    <title>بوابة أكواد Steam Guard - متجر HN</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        body { background: #0b1118; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; padding: 50px 20px; }
+        .container { background: #1b2838; max-width: 400px; margin: auto; padding: 30px; border-radius: 15px; border: 1px solid #c7d5e033; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #66c0f4; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #2a475e; background: #0b1118; color: white; box-sizing: border-box; text-align: center; }
+        button { width: 100%; padding: 15px; margin-top: 15px; background: #66c0f4; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #4ca8e1; }
+        #result { display: none; margin-top: 25px; padding: 15px; background: #2a475e; border-radius: 10px; font-size: 35px; color: #fff; font-family: monospace; letter-spacing: 5px; border: 2px dashed #66c0f4; }
+        #attemptsCounter { margin-top: 15px; font-size: 13px; color: #888; }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>بوابة أكواد متجر HN</h2>
+        <h2>استخراج كود Steam</h2>
         
-        <input type="text" id="orderID" placeholder="أدخل رقم الطلب (Order ID)">
-        <input type="text" id="username" placeholder="أدخل اسم المستخدم (Username)">
-        <button onclick="processRequest()">استخراج الكود الآن</button>
+        <input type="text" id="orderID" placeholder="أدخل رقم الطلب">
+        
+        <input type="text" id="username" placeholder="أدخل اسم المستخدم">
+        
+        <button id="mainBtn" onclick="processRequest()">استخراج الكود الآن</button>
         
         <div id="result">-----</div>
         
-        <div id="attemptsCounter">المحاولات المتبقية لهذا الطلب: 3</div>
-        
-        <p class="footer-text">تأكد من إدخال البيانات كما هي في الفاتورة</p>
+        <div id="attemptsCounter">المحاولات المتبقية: 3</div>
     </div>
 
     <script src="script.js"></script>
+
 </body>
 </html>
