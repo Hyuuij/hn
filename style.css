@@ -1,18 +1,14 @@
 :root {
-    --hn-dark-blue: rgba(9, 19, 26, 0.95); /* أزرق غامق جداً مع شفافية بسيطة جداً ليعطي إيحاء القزاز */
-    --hn-light-blue: #66c0f4;
-    --hn-bg-dark: #060c11;
+    --hn-dark-blue: #09131a; /* لون المربع أزرق غامق جداً وغير شفاف */
+    --hn-bg-blue: #0b1e2d;   /* لون خلفية الصفحة أزرق مريح للعين */
+    --hn-light-blue: #66c0f4; /* لون التمييز */
     --hn-text-white: #ffffff;
 }
 
 body {
-    background-color: var(--hn-bg-dark);
-    /* هنا نضع صورة الشعارات اللي أرسلتها */
-    background-image: url('background.jpg'); 
-    background-size: 300px; /* تصغير حجم الشعار ليتكرر كـ Pattern */
-    background-repeat: repeat;
+    background-color: var(--hn-bg-blue);
     color: var(--hn-text-white);
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,75 +16,79 @@ body {
     margin: 0;
 }
 
-/* هذه هي "طبقة القزاز" اللي تغطي كل الصفحة خلف المربع */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(6, 12, 17, 0.8); /* طبقة زرقاء غامقة شفافة */
-    backdrop-filter: blur(8px); /* هذا هو التأثير اللي يخلي الخلفية كأنها قزاز مغبش */
-    z-index: -1;
-}
-
 .container {
     background-color: var(--hn-dark-blue);
     padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(0,0,0,1); /* ظل قوي ليفصل المربع عن الخلفية */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* ظل خفيف للفصل */
     width: 100%;
     max-width: 380px;
     text-align: center;
-    border: 1px solid rgba(102, 192, 244, 0.2); /* إطار أزرق نحيف جداً */
-    position: relative;
+    border: 1px solid rgba(255,255,255,0.05); /* إطار نحيف جداً */
 }
 
 h2 {
     color: var(--hn-light-blue);
+    margin-bottom: 25px;
     font-size: 22px;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
 }
 
 input {
     width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 6px;
     border: 1px solid #1a2a38;
-    background: #000000; /* حقول سوداء بالكامل كما طلبت */
-    color: white;
+    background-color: #000000; /* الحقول سوداء بالكامل كما طلبت */
+    color: var(--hn-text-white);
     box-sizing: border-box;
     outline: none;
+    font-size: 15px;
     text-align: center;
+}
+
+input:focus {
+    border-color: var(--hn-light-blue);
 }
 
 button {
     width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #47bfff 0%, #1a44c2 100%);
+    padding: 15px;
+    background: linear-gradient(to right, #47bfff, #1a44c2);
     border: none;
     color: white;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 6px;
+    margin-top: 10px;
     font-size: 16px;
-    box-shadow: 0 4px 15px rgba(26, 68, 194, 0.4);
+}
+
+button:hover {
+    opacity: 0.9;
 }
 
 #result {
     margin-top: 25px;
-    font-size: 45px;
-    color: #00ffcc; /* لون مشع للكود عند ظهوره */
-    font-weight: bold;
-    background: rgba(0,0,0,0.5);
+    font-size: 48px;
+    color: var(--hn-light-blue);
+    font-weight: 900;
+    letter-spacing: 8px;
+    display: none;
+    background-color: rgba(0,0,0,0.4);
     padding: 15px;
-    border-radius: 10px;
-    border: 2px dashed var(--hn-light-blue);
-    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+    border-radius: 8px;
+    border: 1px dashed var(--hn-light-blue);
 }
 
 #attemptsCounter {
-    margin-top: 20px;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #666; /* لون هادي للعداد */
+}
+
+.footer-text {
+    margin-top: 25px;
     font-size: 12px;
-    color: #555;
+    color: #444;
 }
