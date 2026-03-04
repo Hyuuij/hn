@@ -1,0 +1,51 @@
+// الرابط الخاص بك
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdht6CoTy4Ldy3IguEeGB3c4lHKjnorQwyJe0D6BWG10T9D21BB-Q_-JZilVd8m6aslgNMYy93u2Yi/pub?output=csv";
+
+async function fetchAndGenerate() {
+    const orderId = document.getElementById('orderInput').value.trim();
+    const username = document.getElementById('userInput').value.trim().toLowerCase();
+
+    // حماية المحاولات (3 محاولات لكل طلب)
+    let attempts = parseInt(localStorage.getItem('try_' + orderId) || "0");
+    if (attempts >= 3) return alert("عذراً، استنفدت محاولات هذا الطلب!");
+
+    try {
+        const response = await fetch(csvUrl);
+        const data = await response.text();
+        const rows = data.split(/\r?\n/).map(row => row.split(","));
+
+        let secret = null;
+        let orderFound = false;
+
+        // البحث عن البيانات
+        for (let i = 1; i < rows.length; i++) {
+            if (rows[i][0]?.trim() === orderId) orderFound = true;
+            if (rows[i][1]?.trim().toLowerCase() === username) {
+                secret = rows[i][2]?.trim(); // shared_secret من العمود C
+            }
+        }
+
+        if (orderFound && secret) {
+            attempts++;
+            localStorage.setItem('try_' + orderId, attempts);
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('attemptsText').innerText = `المحاولات: ${attempts} من 3`;
+            startGenerator(secret);
+        } else {
+            alert("خطأ في رقم الطلب أو اسم الحساب!");
+        }
+    } catch (e) { alert("خطأ في الاتصال بالبيانات!"); }
+}
+
+function startGenerator(s) {
+    const update = () => {
+        // تصنيع الكود باستخدام المكتبة
+        const code = SteamTotp.generateAuthCode(s);
+        document.getElementById('steamCode').innerText = code;
+        let sec = 30 - (Math.floor(Date.now() / 1000) % 30);
+        document.getElementById('timerText').innerText = `يتغير الكود تلقائياً خلال: ${sec} ثانية`;
+    };
+    update();
+    if (window.timer) clearInterval(window.timer);
+    window.timer = setInterval(update, 1000);
+}
