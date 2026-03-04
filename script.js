@@ -1,19 +1,11 @@
-// رابط الجدول الخاص بك
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdht6CoTy4Ldy3IguEeGB3c4lHKjnorQwyJe0D6BWG10t9D21BB-Q_-JZilVd8m6aslgNMYy93u2Yi/pub?output=csv";
+// رابط السكريبت الخاص بك الذي زودتني به
+const scriptURL = "https://script.google.com/macros/s/AKfycby41lJyEd_m_6t71hHLhF9FWKn8Iho6eSRMcnF4HfIW-Y9tTosLVMq3MgO_JyAL4l6xzg/exec"; 
 
 async function processRequest() {
     const orderID = document.getElementById('orderID').value.trim();
     const usernameInput = document.getElementById('username').value.trim().toLowerCase();
     const resultDiv = document.getElementById('result');
-    const btn = document.querySelector('button');
-
-    // نظام حد المحاولات (3 مرات)
-    let attempts = localStorage.getItem('steam_attempts') || 0;
-    if (attempts >= 3) {
-        alert("استنفدت محاولاتك (3 مرات مسموحة فقط).");
-        btn.disabled = true;
-        return;
-    }
+    const counterDiv = document.getElementById('attemptsCounter');
 
     if (!orderID || !usernameInput) {
         alert("يرجى إدخال رقم الطلب واسم المستخدم");
@@ -21,56 +13,42 @@ async function processRequest() {
     }
 
     try {
-        const response = await fetch(csvUrl);
-        const data = await response.text();
-        const rows = data.split(/\r?\n/).map(row => row.split(","));
-        
-        let orderFound = false;
-        let userSecret = null;
+        // الاتصال بسكريبت جوجل للتحقق من البيانات وتحديث المحاولات في الجدول
+        const response = await fetch(`${scriptURL}?orderID=${orderID}&user=${usernameInput}`);
+        const resData = await response.json();
 
-        // الدوران على الجدول للتحقق
-        for (let i = 1; i < rows.length; i++) {
-            const rowOrder = rows[i][0]?.trim();
-            const rowUser = rows[i][1]?.trim().toLowerCase();
-            const rowSecret = rows[i][2]?.trim();
-
-            // التأكد أولاً من وجود رقم الطلب في أي مكان بالجدول
-            if (rowOrder === orderID) {
-                orderFound = true;
-            }
-
-            // إذا تطابق اليوزرنام، نحفظ السر الخاص به
-            if (rowUser === usernameInput) {
-                userSecret = rowSecret;
-            }
-        }
-
-        // المنطق المطلوب: يجب وجود رقم الطلب + وجود سر لليوزرنام
-        if (orderFound && userSecret) {
-            const code = generateSteamCode(userSecret);
+        if (resData.status === "success") {
+            // توليد كود Steam Guard باستخدام مكتبة CryptoJS
+            const code = generateSteamCode(resData.secret);
             resultDiv.innerText = code;
             resultDiv.style.display = 'block';
+            
+            // تحديث العداد بناءً على القيمة الراجعة من الجدول مباشرة
+            counterDiv.innerText = "المحاولات المتبقية لهذا الطلب: " + resData.remaining;
 
-            attempts++;
-            localStorage.setItem('steam_attempts', attempts);
-        } else if (!orderFound) {
-            alert("رقم الطلب غير صحيح أو غير موجود.");
+        } else if (resData.status === "blocked") {
+            alert("عذراً، هذا الطلب استنفد جميع محاولاته (3 محاولات مسموحة).");
+            counterDiv.innerText = "المحاولات المتبقية: 0";
+            resultDiv.style.display = 'none';
         } else {
-            alert("اسم المستخدم غير موجود.");
+            alert("البيانات غير صحيحة، تأكد من رقم الطلب واسم المستخدم.");
+            resultDiv.style.display = 'none';
         }
-
-    } catch (error) {
-        alert("حدث خطأ في جلب البيانات.");
+    } catch (e) {
+        console.error("Error:", e);
+        alert("حدث خطأ في الاتصال بالخادم. تأكد من أن السكريبت منشور (Deployed) بصلاحية الوصول للجميع (Anyone).");
     }
 }
 
-// محرك التشفير الناجح CryptoJS
+// محرك توليد الأكواد المطابق لبرنامج SDA
 function generateSteamCode(secret) {
     try {
         const timeCount = Math.floor(Date.now() / 1000 / 30);
         let timeHex = timeCount.toString(16).padStart(16, '0');
         let timeWords = CryptoJS.enc.Hex.parse(timeHex);
+        
         let key = CryptoJS.enc.Base64.parse(secret);
+        
         let hmac = CryptoJS.HmacSHA1(timeWords, key);
         let hmacSig = hmac.toString(CryptoJS.enc.Hex);
 
@@ -92,5 +70,7 @@ function generateSteamCode(secret) {
             fullCode = Math.floor(fullCode / 26);
         }
         return finalCode;
-    } catch (e) { return "ERR"; }
+    } catch (e) {
+        return "ERROR";
+    }
 }
