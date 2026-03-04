@@ -1,75 +1,80 @@
+// الرابط المباشر لجدول بياناتك (CSV)
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdht6CoTy4Ldy3IguEeGB3c4lHKjnorQwyJe0D6BWG10t9D21BB-Q_-JZilVd8m6aslgNMYy93u2Yi/pub?output=csv";
 
-async function startExtraction() {
-    const oIn = document.getElementById('orderID').value.trim();
-    const uIn = document.getElementById('user').value.trim().toLowerCase();
+async function processRequest() {
+    const orderID = document.getElementById('orderID').value.trim();
+    const username = document.getElementById('username').value.trim().toLowerCase();
+    const resultDiv = document.getElementById('result');
 
-    // المشكلة 4: حد الاستخدام (3 مرات لكل رقم طلب)
-    let usageCount = localStorage.getItem('usage_' + oIn) || 0;
-    if (parseInt(usageCount) >= 3) {
-        alert("عذراً، لقد تجاوزت الحد الأقصى لاستخدام رقم هذا الطلب (3 مرات).");
+    if (!orderID || !username) {
+        alert("يرجى إدخال رقم الطلب واسم المستخدم");
         return;
     }
 
     try {
-        const res = await fetch(csvUrl);
-        const data = await res.text();
+        const response = await fetch(csvUrl);
+        const data = await response.text();
         const rows = data.split(/\r?\n/).map(row => row.split(","));
         
-        let secret = null;
+        let sharedSecret = null;
 
-        // المشكلة 2: التأكد أن اليوزر ورقم الطلب في نفس السطر
+        // البحث عن المطابقة في الجدول
         for (let i = 1; i < rows.length; i++) {
-            const rowOrderID = rows[i][0]?.trim();
-            const rowUsername = rows[i][1]?.trim().toLowerCase();
-            const rowSecret = rows[i][2]?.trim();
-
-            if (rowOrderID === oIn && rowUsername === uIn && rowSecret) {
-                secret = rowSecret.replace(/=/g, ''); // المشكلة 1: تنظيف السر
+            if (rows[i][0]?.trim() === orderID && rows[i][1]?.trim().toLowerCase() === username) {
+                sharedSecret = rows[i][2]?.trim();
                 break;
             }
         }
 
-        if (secret) {
-            // تحديث عدد الاستخدامات
-            usageCount++;
-            localStorage.setItem('usage_' + oIn, usageCount);
-
-            document.getElementById('resultArea').style.display = 'block';
-            
-            // المشكلة 3: توليد كود واحد ثابت (بدون setInterval)
-            document.getElementById('steamCode').innerText = generateSteamCode(secret);
-            document.getElementById('timerBar').innerText = `عدد مرات الاستخراج المتبقية لهذا الطلب: ${3 - usageCount}`;
-            
+        if (sharedSecret) {
+            // توليد الكود باستخدام المحرك الناجح (CryptoJS)
+            const code = generateSteamCode(sharedSecret);
+            resultDiv.innerText = code;
+            resultDiv.style.display = 'block';
         } else {
-            alert("بيانات غير متطابقة! تأكد من أن رقم الطلب واليوزر في نفس السطر بالجدول.");
+            alert("البيانات غير متطابقة، تأكد من رقم الطلب واليوزرنام");
         }
-    } catch (e) {
-        alert("خطأ في جلب البيانات من الجدول.");
+    } catch (error) {
+        console.error("خطأ في جلب البيانات:", error);
+        alert("حدث خطأ أثناء الاتصال بالخادم");
     }
 }
 
-// محرك التوليد الأساسي
 function generateSteamCode(secret) {
-    const b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let bin = '';
-    for (let i = 0; i < secret.length; i++) {
-        const p = b64.indexOf(secret[i]);
-        if (p !== -1) bin += p.toString(2).padStart(6, '0');
+    try {
+        // 1. حساب الوقت الحالي (دورة 30 ثانية)
+        const timeCount = Math.floor(Date.now() / 1000 / 30);
+        let timeHex = timeCount.toString(16).padStart(16, '0');
+        let timeWords = CryptoJS.enc.Hex.parse(timeHex);
+
+        // 2. فك تشفير السر من Base64
+        let key = CryptoJS.enc.Base64.parse(secret);
+
+        // 3. تطبيق HMAC-SHA1
+        let hmac = CryptoJS.HmacSHA1(timeWords, key);
+        let hmacSig = hmac.toString(CryptoJS.enc.Hex);
+
+        // 4. التقطيع الديناميكي (Steam Truncation)
+        let h = [];
+        for (let c = 0; c < hmacSig.length; c += 2) {
+            h.push(parseInt(hmacSig.substr(c, 2), 16));
+        }
+        
+        let start = h[19] & 0xf;
+        let fullCode = ((h[start] & 0x7f) << 24) | 
+                       ((h[start+1] & 0xff) << 16) | 
+                       ((h[start+2] & 0xff) << 8) | 
+                       (h[start+3] & 0xff);
+
+        // 5. التحويل لأبجدية Steam (26 حرفاً)
+        const chars = "23456789BCDFGHJKMNPQRTVWXY";
+        let finalCode = "";
+        for (let i = 0; i < 5; i++) {
+            finalCode += chars.charAt(fullCode % 26);
+            fullCode = Math.floor(fullCode / 26);
+        }
+        return finalCode;
+    } catch (e) {
+        return "ERROR";
     }
-    const time = Math.floor(Date.now() / 1000 / 30);
-    const tBuf = new Uint8Array(8);
-    for (let i = 0; i < 8; i++) tBuf[7 - i] = (time >> (i * 8)) & 0xff;
-    const sha = new jsSHA("SHA-1", "BYTES");
-    let sBytes = "";
-    for(let i=0; i<bin.length; i+=8) sBytes += String.fromCharCode(parseInt(bin.substr(i,8), 2));
-    sha.setHMACKey(sBytes, "BYTES");
-    sha.update(String.fromCharCode.apply(null, tBuf));
-    const h = sha.getHMAC("BYTES");
-    const chars = "23456789BCDFGHJKMNPQRTVWXY";
-    const off = h.charCodeAt(h.length - 1) & 0xf;
-    let full = ((h.charCodeAt(off) & 0x7f) << 24) | ((h.charCodeAt(off + 1) & 0xff) << 16) | ((h.charCodeAt(off + 2) & 0xff) << 8) | (h.charCodeAt(off + 3) & 0xff);
-    let res = "";
-    for (let i = 0; i < 5; i++) { res += chars.charAt(full % chars.length); full = Math.floor(full / chars.length); }
-    return res;
 }
