@@ -1,22 +1,18 @@
 :root {
-    /* تم تعديل الألوان لتقليد ثيم متجر HN بناءً على طلبك */
-    --hn-dark-blue: #09131a; /* لون المربع الأزرق الغامق غير الشفاف */
-    --hn-light-blue: #66c0f4; /* لون التمييز الأزرق الفاتح */
-    --hn-bg-dark: #060c11; /* لون خلفية الصفحة الأساسية */
-    --hn-text-white: #ffffff; /* لون الخط الأبيض */
-    --border-color: rgba(255,255,255,0.08);
+    --hn-dark-blue: rgba(9, 19, 26, 0.95); /* أزرق غامق جداً مع شفافية بسيطة جداً ليعطي إيحاء القزاز */
+    --hn-light-blue: #66c0f4;
+    --hn-bg-dark: #060c11;
+    --hn-text-white: #ffffff;
 }
 
 body {
-    /* إضافة الخلفية التي كأنها قزاز شفاف باللون الأزرق الغامق */
     background-color: var(--hn-bg-dark);
-    background-image: url('background.jpg'); /* استبدل background.jpg باسم ملف صورتك الخاص بالخلفية */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed; /* لتظل الخلفية ثابتة */
-    color: var(--hn-text-white); /* تم تغيير لون الخط الأساسي للأبيض */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* هنا نضع صورة الشعارات اللي أرسلتها */
+    background-image: url('background.jpg'); 
+    background-size: 300px; /* تصغير حجم الشعار ليتكرر كـ Pattern */
+    background-repeat: repeat;
+    color: var(--hn-text-white);
+    font-family: 'Segoe UI', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,92 +20,75 @@ body {
     margin: 0;
 }
 
+/* هذه هي "طبقة القزاز" اللي تغطي كل الصفحة خلف المربع */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(6, 12, 17, 0.8); /* طبقة زرقاء غامقة شفافة */
+    backdrop-filter: blur(8px); /* هذا هو التأثير اللي يخلي الخلفية كأنها قزاز مغبش */
+    z-index: -1;
+}
+
 .container {
-    /* تم جعل المربع أزرق غامق وغير شفاف تماماً */
     background-color: var(--hn-dark-blue);
-    padding: 35px;
-    border-radius: 12px; /* جعل الحواف أقل انحناءً قليلاً */
-    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0,0,0,1); /* ظل قوي ليفصل المربع عن الخلفية */
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     text-align: center;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(102, 192, 244, 0.2); /* إطار أزرق نحيف جداً */
+    position: relative;
 }
 
 h2 {
     color: var(--hn-light-blue);
-    margin-bottom: 25px;
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
 }
 
 input {
     width: 100%;
-    padding: 14px;
-    margin: 10px 0;
-    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
     border: 1px solid #1a2a38;
-    background-color: rgba(0, 0, 0, 0.5); /* خلفية داكنة جزئية لحقول الإدخال */
-    color: var(--hn-text-white); /* لون خط الإدخال أبيض */
+    background: #000000; /* حقول سوداء بالكامل كما طلبت */
+    color: white;
     box-sizing: border-box;
     outline: none;
-    font-size: 15px;
-    transition: border-color 0.2s;
-}
-
-input:focus {
-    border-color: var(--hn-light-blue);
+    text-align: center;
 }
 
 button {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(to right, #47bfff, #1a44c2);
+    padding: 16px;
+    background: linear-gradient(135deg, #47bfff 0%, #1a44c2 100%);
     border: none;
     color: white;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 5px;
-    margin-top: 15px;
+    border-radius: 8px;
     font-size: 16px;
-    transition: transform 0.1s, opacity 0.3s;
-}
-
-button:hover {
-    opacity: 0.95;
-}
-
-button:active {
-    transform: scale(0.98);
+    box-shadow: 0 4px 15px rgba(26, 68, 194, 0.4);
 }
 
 #result {
     margin-top: 25px;
-    font-size: 50px;
-    color: var(--hn-light-blue);
-    font-weight: 900;
-    letter-spacing: 10px;
-    display: none;
-    background-color: rgba(0,0,0,0.3);
-    padding: 18px;
-    border-radius: 8px;
-    border: 1px dashed var(--hn-light-blue);
-    font-family: 'Courier New', Courier, monospace;
+    font-size: 45px;
+    color: #00ffcc; /* لون مشع للكود عند ظهوره */
+    font-weight: bold;
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px dashed var(--hn-light-blue);
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
 }
 
 #attemptsCounter {
-    margin-top: 15px;
-    font-size: 13px;
-    color: #888888; /* لون رمادي فاتح لعداد المحاولات */
-    background-color: rgba(0,0,0,0.2);
-    padding: 7px 12px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-.footer-text {
-    margin-top: 25px;
+    margin-top: 20px;
     font-size: 12px;
-    color: #666666;
-    line-height: 1.5;
+    color: #555;
 }
