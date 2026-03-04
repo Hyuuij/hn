@@ -1,98 +1,91 @@
-// رابط السكريبت الجديد الذي زودتني به
-const scriptURL = "https://script.google.com/macros/s/AKfycbz63_Yk5orvvPniPC-CmAfOtjIBPiOHeEOO_xARZ5nsHERQmrj9pEgfkdezOuB6CxE7KQ/exec"; 
+// رابط السكريبت الخاص بك (تأكد من عمل New Deployment عند أي تغيير في Apps Script)
+const scriptURL = "https://script.google.com/macros/s/AKfycbzStcky-ncmEhopVbjpJI0eS15Rz9v2ru0MOaIE9iU8piyVKKNVzQvh8qWMWgPoKImF7g/exec"; 
 
-/**
- * الوظيفة الأساسية لمعالجة الطلب عند الضغط على الزر
- */
 async function processRequest() {
-    // 1. جلب المدخلات وتنظيفها من المسافات
     const orderID = document.getElementById('orderID').value.trim();
     const username = document.getElementById('username').value.trim().toLowerCase();
     
-    // عناصر الواجهة لتحديثها
     const resultDiv = document.getElementById('result');
     const counterDiv = document.getElementById('attemptsCounter');
     const btn = document.getElementById('mainBtn');
 
-    // 2. فحص بسيط قبل الإرسال
+    // 1. فحص المدخلات
     if (!orderID || !username) {
-        alert("يرجى إدخال رقم الطلب واسم المستخدم أولاً");
+        alert("يرجى إدخال رقم الطلب واسم المستخدم");
         return;
     }
 
-    // 3. تحديث حالة الزر (تجربة مستخدم أفضل)
-    btn.disabled = true;
-    btn.innerText = "جاري التحقق من البيانات...";
+    // تجهيز الواجهة (بدون disabled كما طلبت)
+    btn.innerText = "جاري الاستخراج...";
     resultDiv.style.display = 'none';
 
     try {
-        // 4. الاتصال بسكريبت جوجل (الربط مع الجدول)
-        // نستخدم encodeURIComponent لضمان عدم تعليق الرابط إذا كان هناك رموز
+        // 2. إرسال الطلب لجوجل (يرسل الاثنين: رقم الطلب واليوزر)
         const finalURL = `${scriptURL}?orderID=${encodeURIComponent(orderID)}&user=${encodeURIComponent(username)}`;
         
         const response = await fetch(finalURL);
         const resData = await response.json();
 
-        // 5. التعامل مع ردود السكريبت المختلفة
+        // 3. التعامل مع ردود السيرفر (Apps Script)
         if (resData.status === "success") {
-            // توليد الكود من السر القادم من الجدول
+            // استخدام محرك التصنيع المطابق لنسختك
             const steamCode = generateSteamCode(resData.secret);
             
-            // عرض النتائج للمستخدم
             resultDiv.innerText = steamCode;
             resultDiv.style.display = 'block';
             counterDiv.innerText = "المحاولات المتبقية لهذا الطلب: " + resData.remaining;
             
         } else if (resData.status === "blocked") {
-            alert("نعتذر، لقد استنفدت الحد الأقصى للمحاولات (3 محاولات) لهذا الطلب.");
-            counterDiv.innerText = "المحاولات المتبقية: 0";
-        } else if (resData.status === "not_found") {
-            alert("المعلومات غير صحيحة. يرجى التأكد من رقم الطلب واسم المستخدم.");
+            alert("عذراً، هذا الطلب استنفد كافة المحاولات (3/3)");
+        } else if (resData.status === "order_not_found") {
+            alert("رقم الطلب غير صحيح أو غير موجود");
+        } else if (resData.status === "user_not_found") {
+            alert("اسم المستخدم غير مطابق لهذا الطلب");
         } else {
-            alert("حدث خطأ غير متوقع: " + (resData.message || "Unknown Error"));
+            alert("حدث خطأ في البيانات");
         }
 
     } catch (error) {
-        console.error("Fetch Error:", error);
-        alert("فشل الاتصال بالسيرفر. تأكد من جودة الإنترنت أو من صلاحيات نشر السكريبت.");
+        console.error("Error:", error);
+        alert("فشل الاتصال بالسيرفر. تأكد من إعدادات الـ Deployment");
     } finally {
-        // 6. إعادة الزر لحالته الطبيعية
-        btn.disabled = false;
         btn.innerText = "استخراج الكود الآن";
     }
 }
 
 /**
- * محرك توليد أكواد Steam Guard (نفس آلية تطبيق الموبايل)
+ * محرك تصنيع الأكواد (نسخة مطابقة تماماً للمحرك الاحترافي الذي أرفقته)
  */
-function generateSteamCode(secret) {
+function generateSteamCode(secretB64) {
     try {
-        // أ. حساب الوقت الحالي بوحدات 30 ثانية
-        const timeCount = Math.floor(Date.now() / 1000 / 30);
+        // 1. حساب الوقت الحالي (بثواني 30)
+        const epoch = Math.floor(Date.now() / 1000);
+        const timeCount = Math.floor(epoch / 30);
+
+        // 2. تحويل الوقت إلى Hex وكلمات برمجية
         let timeHex = timeCount.toString(16).padStart(16, '0');
         let timeWords = CryptoJS.enc.Hex.parse(timeHex);
-        
-        // ب. فك تشفير السر (يفترض أن يكون Base64 كما في ملفات SDA)
-        let key = CryptoJS.enc.Base64.parse(secret);
-        
-        // ج. تطبيق تشفير HMAC-SHA1
+
+        // 3. فك تشفير السر من Base64 (القادم من العمود C في جدولك)
+        let key = CryptoJS.enc.Base64.parse(secretB64);
+
+        // 4. تطبيق HMAC-SHA1
         let hmac = CryptoJS.HmacSHA1(timeWords, key);
         let hmacSig = hmac.toString(CryptoJS.enc.Hex);
 
-        // د. تحويل التوقيع إلى مصفوفة بايتات
+        // 5. التقطيع الديناميكي (Dynamic Truncation)
         let h = [];
         for (let c = 0; c < hmacSig.length; c += 2) {
             h.push(parseInt(hmacSig.substr(c, 2), 16));
         }
         
-        // هـ. عملية التقطيع الديناميكي (Dynamic Truncation)
         let start = h[19] & 0xf;
         let fullCode = ((h[start] & 0x7f) << 24) | 
                        ((h[start+1] & 0xff) << 16) | 
                        ((h[start+2] & 0xff) << 8) | 
                        (h[start+3] & 0xff);
 
-        // و. التحويل إلى أبجدية Steam المكونة من 26 حرفاً
+        // 6. التحويل لأبجدية Steam الـ 26 حرفاً
         const chars = "23456789BCDFGHJKMNPQRTVWXY";
         let finalCode = "";
         for (let i = 0; i < 5; i++) {
@@ -100,7 +93,7 @@ function generateSteamCode(secret) {
             fullCode = Math.floor(fullCode / 26);
         }
         
-        return finalCode; // يرجع الكود مثل: J7K2B
+        return finalCode;
     } catch (e) {
         console.error("Generator Error:", e);
         return "ERROR";
