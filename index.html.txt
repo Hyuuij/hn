@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة استخراج الأكواد</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.4.2/sha.js"></script>
+</head>
+<body>
+    <div class="card">
+        <h2>استخراج كود ستيم</h2>
+        <input type="text" id="orderID" placeholder="رقم الطلب">
+        <input type="text" id="user" placeholder="اسم الحساب">
+        <button onclick="startExtraction()">استخراج الكود الآن</button>
+        
+        <div id="resultArea" class="result">
+            <div id="steamCode" class="code">-----</div>
+            <p id="timerText"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
