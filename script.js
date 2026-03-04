@@ -1,5 +1,5 @@
 // رابط السكريبت الخاص بك
-const scriptURL = "https://script.google.com/macros/s/AKfycbzxCbnKrqBPtn-BhWA3MHwerWWHx-A7YFiDF_zWWEpxmuPdvSBb0_Wj7VcojPAEo0siQQ/exec"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbydCM-29YfDcqcUKJ-zaGpx4Cu34TO9Lbl5n5vKwZUGOudmVl0JpivTxCOmL_nc9Nkj3g/exec"; 
 
 async function processRequest() {
     const orderID = document.getElementById('orderID').value.trim();
