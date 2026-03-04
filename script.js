@@ -1,48 +1,57 @@
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdht6CoTy4Ldy3IguEeGB3c4lHKjnorQwyJe0D6BWG10t9D21BB-Q_-JZilVd8m6aslgNMYy93u2Yi/pub?output=csv";
 
 async function startExtraction() {
-    // 1. جلب القيم من الخانات
     const oIn = document.getElementById('orderID').value.trim();
     const uIn = document.getElementById('user').value.trim().toLowerCase();
 
-    if (!oIn || !uIn) {
-        alert("أدخل رقم الطلب واسم الحساب أولاً!");
-        return;
-    }
-
     try {
-        // 2. جلب بيانات الجدول
         const res = await fetch(csvUrl);
         const data = await res.text();
-        const rows = data.split("\n").map(r => r.split(","));
+        
+        // تقسيم البيانات لأسطر
+        const rows = data.split(/\r?\n/).map(row => row.split(","));
         
         let secret = null;
-        // 3. البحث عن المطابقة
-        for(let i=1; i<rows.length; i++) {
-            if(rows[i][0]?.trim() === oIn && rows[i][1]?.trim().toLowerCase() === uIn) {
-                secret = rows[i][2]?.trim().replace(/=/g, ''); 
+
+        // البحث في كل الأسطر
+        for (let i = 1; i < rows.length; i++) {
+            const columns = rows[i];
+            
+            // التأكد أن السطر يحتوي على بيانات كافية
+            if (columns.length < 3) continue; 
+
+            const rowOrderID = columns[0]?.trim();
+            const rowUsername = columns[1]?.trim().toLowerCase();
+            const rowSecret = columns[2]?.trim();
+
+            // مطابقة رقم الطلب واليوزر (حتى لو كان في سطر بعيد)
+            if (rowOrderID === oIn && rowUsername === uIn && rowSecret) {
+                secret = rowSecret.replace(/=/g, ''); 
                 break;
             }
         }
 
-        // 4. تشغيل المولد إذا وجدنا السر
-        if(secret) {
+        if (secret) {
             document.getElementById('resultArea').style.display = 'block';
             if (window.otpTimer) clearInterval(window.otpTimer);
-            window.otpTimer = setInterval(() => {
+            
+            const updateUI = () => {
                 document.getElementById('steamCode').innerText = generateSteamCode(secret);
                 let seconds = 30 - (Math.floor(Date.now() / 1000) % 30);
                 document.getElementById('timerBar').innerText = "يتحدث الكود خلال: " + seconds + " ثانية";
-            }, 1000);
-        } else { 
-            alert("البيانات غير صحيحة أو غير موجودة بالجدول!"); 
+            };
+            
+            updateUI();
+            window.otpTimer = setInterval(updateUI, 1000);
+        } else {
+            alert("بيانات غير متطابقة! تأكد أن رقم الطلب واليوزر صحيحين في الجدول.");
         }
-    } catch(e) { 
-        alert("فشل الاتصال بالجدول، تأكد من نشره بصيغة CSV"); 
+    } catch (e) {
+        alert("خطأ في الاتصال بالجدول!");
     }
 }
 
-// محرك توليد الأكواد (نفس المعتمد الذي أظهر PDW9T)
+// دالة التوليد (ثابتة لا تتغير)
 function generateSteamCode(secret) {
     const b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     let bin = '';
