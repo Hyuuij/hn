@@ -1,5 +1,5 @@
-// رابط السكريبت الخاص بك (Google Apps Script)
-const scriptURL = "https://script.google.com/macros/s/AKfycby41lJyEd_m_6t71hHLhF9FWKn8Iho6eSRMcnF4HfIW-Y9tTosLVMq3MgO_JyAL4l6xzg/exec"; 
+// الرابط الجديد الذي زودتني به
+const scriptURL = "https://script.google.com/macros/s/AKfycbz63_Yk5orvvPniPC-CmAfOtjIBPiOHeEOO_xARZ5nsHERQmrj9pEgfkdezOuB6CxE7KQ/exec"; 
 
 async function processRequest() {
     const orderID = document.getElementById('orderID').value.trim();
@@ -8,63 +8,57 @@ async function processRequest() {
     const counterDiv = document.getElementById('attemptsCounter');
     const btn = document.getElementById('mainBtn');
 
-    // التأكد من إدخال البيانات
     if (!orderID || !usernameInput) {
         alert("يرجى إدخال رقم الطلب واسم المستخدم");
         return;
     }
 
-    // تغيير حالة الزر أثناء الانتظار
-    btn.innerText = "جاري التحقق...";
+    // إظهار حالة التحميل للمستخدم
+    btn.innerText = "جاري التحقق من البيانات...";
     btn.disabled = true;
+    resultDiv.style.display = 'none';
 
     try {
-        // 1. الاتصال بجوجل شيت للتحقق من رقم الطلب وزيادة المحاولات
+        // طلب البيانات من سكريبت جوجل المحدث
         const response = await fetch(`${scriptURL}?orderID=${orderID}&user=${usernameInput}`);
         const resData = await response.json();
 
         if (resData.status === "success") {
-            // 2. توليد الكود باستخدام المحرك الصحيح
+            // توليد الكود الصحيح باستخدام المحرك
             const code = generateSteamCode(resData.secret);
             
-            // 3. عرض النتيجة وتحديث العداد
             resultDiv.innerText = code;
             resultDiv.style.display = 'block';
             counterDiv.innerText = "المحاولات المتبقية لهذا الطلب: " + resData.remaining;
             
         } else if (resData.status === "blocked") {
-            alert("عذراً، هذا الطلب استنفد جميع محاولاته (3 محاولات مسموحة).");
+            alert("عذراً، هذا الطلب استنفد جميع محاولاته (3 محاولات).");
             counterDiv.innerText = "المحاولات المتبقية: 0";
-            resultDiv.style.display = 'none';
         } else {
-            alert("البيانات غير صحيحة، تأكد من رقم الطلب واسم المستخدم.");
-            resultDiv.style.display = 'none';
+            alert("المعلومات غير صحيحة، تأكد من رقم الطلب واسم المستخدم.");
         }
     } catch (e) {
         console.error("Error:", e);
-        alert("حدث خطأ في الاتصال بالسيرفر. تأكد من نشر السكريبت (Deploy) للجميع.");
+        alert("حدث خطأ في الاتصال بالسيرفر. تأكد من أن السكريبت يعمل.");
     } finally {
         btn.innerText = "استخراج الكود الآن";
         btn.disabled = false;
     }
 }
 
-// المحرك الصحيح لتوليد الأكواد (مطابق لـ Steam 100%)
+// محرك توليد الأكواد المطابق لـ Steam
 function generateSteamCode(secret) {
     try {
-        // حساب الوقت الحالي (دورة 30 ثانية)
         const timeCount = Math.floor(Date.now() / 1000 / 30);
         let timeHex = timeCount.toString(16).padStart(16, '0');
         let timeWords = CryptoJS.enc.Hex.parse(timeHex);
         
-        // فك تشفير السر (Base64) - كما هو مخزن في SDA
+        // فك التشفير كـ Base64 (كما هو مخزن في ملفات Steam/SDA)
         let key = CryptoJS.enc.Base64.parse(secret);
         
-        // تطبيق HMAC-SHA1
         let hmac = CryptoJS.HmacSHA1(timeWords, key);
         let hmacSig = hmac.toString(CryptoJS.enc.Hex);
 
-        // التقطيع الديناميكي (Dynamic Truncation)
         let h = [];
         for (let c = 0; c < hmacSig.length; c += 2) {
             h.push(parseInt(hmacSig.substr(c, 2), 16));
@@ -76,7 +70,6 @@ function generateSteamCode(secret) {
                        ((h[start+2] & 0xff) << 8) | 
                        (h[start+3] & 0xff);
 
-        // أبجدية Steam (26 حرفاً)
         const chars = "23456789BCDFGHJKMNPQRTVWXY";
         let finalCode = "";
         for (let i = 0; i < 5; i++) {
@@ -85,7 +78,6 @@ function generateSteamCode(secret) {
         }
         return finalCode;
     } catch (e) {
-        console.error("تنبيه: خطأ في تشفير الكود", e);
         return "ERROR";
     }
 }
