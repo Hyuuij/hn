@@ -1,18 +1,21 @@
 :root {
-    --steam-blue: rgba(27, 40, 56, 0.9); /* جعل الخلفية شفافة قليلاً لتظهر الخلفية */
-    --steam-light-blue: #66c0f4;
-    --steam-dark: #101822;
-    --border-color: rgba(255,255,255,0.1);
+    /* تم تعديل الألوان لتقليد ثيم المتجر بناءً على طلبك */
+    --hn-dark-blue: #09131a; /* لون المربع الأزرق الغامق غير الشفاف */
+    --hn-light-blue: #66c0f4; /* لون التمييز الأزرق الفاتح */
+    --hn-bg-dark: #060c11; /* لون خلفية الصفحة الأساسية */
+    --hn-text-white: #ffffff; /* لون الخط الأبيض المقترح ليتناسب مع المتجر */
+    --border-color: rgba(255,255,255,0.08);
 }
 
 body {
-    /* تم إضافة الخلفية المخصصة هنا */
-    background-image: url('background.jpg'); /* استبدل background.jpg باسم ملف صورتك */
+    /* إضافة الخلفية التي كأنها قزاز شفاف باللون الأزرق الغامق */
+    background-color: var(--hn-bg-dark);
+    background-image: url('background.jpg'); /* استبدل background.jpg باسم ملف صورتك الخاص بالخلفية */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* لتظل الخلفية ثابتة عند التمرير */
-    color: white;
+    background-attachment: fixed; /* لتظل الخلفية ثابتة */
+    color: var(--hn-text-white); /* تم تغيير لون الخط الأساسي للأبيض */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     align-items: center;
@@ -22,55 +25,54 @@ body {
 }
 
 .container {
-    background: var(--steam-blue);
+    /* تم جعل المربع أزرق غامق وغير شفاف تماماً بناءً على طلبك */
+    background-color: var(--hn-dark-blue);
     padding: 35px;
-    border-radius: 15px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    border-radius: 12px; /* جعل الحواف أقل انحناءً قليلاً لتتناسب مع ثيم المتجر */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     text-align: center;
     border: 1px solid var(--border-color);
-    backdrop-filter: blur(5px); /* إضافة تأثير ضبابي على الخلفية الزرقاء */
 }
 
 h2 {
-    color: var(--steam-light-blue);
+    color: var(--hn-light-blue);
     margin-bottom: 25px;
-    font-size: 26px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-size: 24px;
+    font-weight: 700;
 }
 
 input {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
-    border-radius: 6px;
-    border: 1px solid #2a475e;
-    background: rgba(11, 17, 24, 0.8);
-    color: white;
+    border-radius: 5px;
+    border: 1px solid #1a2a38;
+    background-color: rgba(0, 0, 0, 0.5); /* خلفية داكنة جزئية لحقول الإدخال */
+    color: var(--hn-text-white); /* لون خط الإدخال أبيض */
     box-sizing: border-box;
     outline: none;
     font-size: 15px;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s;
 }
 
 input:focus {
-    border-color: var(--steam-light-blue);
+    border-color: var(--hn-light-blue);
 }
 
 button {
     width: 100%;
-    padding: 16px;
+    padding: 15px;
     background: linear-gradient(to right, #47bfff, #1a44c2);
     border: none;
     color: white;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 5px;
     margin-top: 15px;
-    font-size: 17px;
+    font-size: 16px;
     transition: transform 0.1s, opacity 0.3s;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 button:hover {
@@ -83,33 +85,31 @@ button:active {
 
 #result {
     margin-top: 25px;
-    font-size: 55px;
-    color: var(--steam-light-blue);
+    font-size: 50px;
+    color: var(--hn-light-blue);
     font-weight: 900;
-    letter-spacing: 12px;
+    letter-spacing: 10px;
     display: none;
-    background: rgba(0,0,0,0.4);
-    padding: 20px;
-    border-radius: 12px;
-    border: 2px dashed var(--steam-light-blue);
-    font-family: 'Courier New', Courier, monospace; /* خط يشبه الأكواد */
-    text-shadow: 0 0 10px rgba(102, 192, 244, 0.5);
+    background-color: rgba(0,0,0,0.3);
+    padding: 18px;
+    border-radius: 8px;
+    border: 1px dashed var(--hn-light-blue);
+    font-family: 'Courier New', Courier, monospace;
 }
 
-/* تنسيق عداد المحاولات الجديد */
 #attemptsCounter {
     margin-top: 15px;
-    font-size: 14px;
-    color: #aaaaaa;
-    background: rgba(0,0,0,0.2);
-    padding: 8px;
-    border-radius: 5px;
+    font-size: 13px;
+    color: #888888; /* لون رمادي فاتح لعداد المحاولات ليتناسب مع الثيم الداكن */
+    background-color: rgba(0,0,0,0.2);
+    padding: 7px 12px;
+    border-radius: 4px;
     display: inline-block;
 }
 
 .footer-text {
     margin-top: 25px;
-    font-size: 13px;
-    color: #888;
+    font-size: 12px;
+    color: #666666;
     line-height: 1.5;
 }
