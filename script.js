@@ -1,4 +1,4 @@
-// رابط السكريبت الخاص بك الذي زودتني به
+// رابط السكريبت الخاص بك
 const scriptURL = "https://script.google.com/macros/s/AKfycbzxCbnKrqBPtn-BhWA3MHwerWWHx-A7YFiDF_zWWEpxmuPdvSBb0_Wj7VcojPAEo0siQQ/exec"; 
 
 async function processRequest() {
@@ -18,7 +18,7 @@ async function processRequest() {
         const resData = await response.json();
 
         if (resData.status === "success") {
-            // توليد كود Steam Guard باستخدام مكتبة CryptoJS
+            // توليد كود Steam Guard باستخدام المحرك المصحح
             const code = generateSteamCode(resData.secret);
             resultDiv.innerText = code;
             resultDiv.style.display = 'block';
@@ -40,12 +40,13 @@ async function processRequest() {
     }
 }
 
-// محرك توليد الأكواد المطابق لبرنامج SDA
+// محرك توليد الأكواد المصحح (الوحيد الذي تم تغييره لضمان المطابقة)
 function generateSteamCode(secret) {
     try {
         const timeCount = Math.floor(Date.now() / 1000 / 30);
-        let timeHex = timeCount.toString(16).padStart(16, '0');
-        let timeWords = CryptoJS.enc.Hex.parse(timeHex);
+        
+        // التعديل الجوهري لضمان مطابقة SDA وتطبيق الموبايل
+        let timeWords = CryptoJS.lib.WordArray.create([0, timeCount]); 
         
         let key = CryptoJS.enc.Base64.parse(secret);
         
