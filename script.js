@@ -1,5 +1,10 @@
-// رابط السكريبت الخاص بك
-const scriptURL = "https://script.google.com/macros/s/AKfycbzUrhxICHVIoMsNSxP3iJ6p2bDBFxfI1R-oYIUN56SndTP0HwmDBpJJ3a20hfdP4n6btQ/exec"; 
+// إضافة المكتبة برمجياً لضمان عملها في أي مكان
+var script = document.createElement('script');
+script.src = "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
+document.head.appendChild(script);
+
+// رابط السكريبت الخاص بك (تأكد من عمل Deploy جديد عند تغيير كود جوجل)
+const scriptURL = "https://script.google.com/macros/s/AKfycbyxeKM6c19sbgQsSfBZRrR7yhBVcPvLKTfs_HIlRhBDG-Yn8PMkvyZD5v6MN9LKVInTGA/exec"; 
 
 async function processRequest() {
     const orderID = document.getElementById('orderID').value.trim();
@@ -13,82 +18,75 @@ async function processRequest() {
     }
 
     try {
-        // الاتصال بسكريبت جوجل
+        // 1. الاتصال بجوجل شيت
         const response = await fetch(`${scriptURL}?orderID=${orderID}&user=${usernameInput}`);
         const resData = await response.json();
 
-        // 🔥 كونسول لمراقبة الرد من جوجل 🔥
-        console.log("الرد القادم من جوجل شيت:", resData);
+        console.log("الرد من جوجل:", resData);
 
         if (resData.status === "success") {
-            // 🔥 كونسول للتأكد من السر قبل التصنيع 🔥
-            console.log("السر (Secret) اللي بنستخدمه الآن:", resData.secret);
+            const secretFromServer = resData.secret;
 
-            // تشغيل محرك التصنيع
-            const code = generateSteamCode(resData.secret);
+            if (!secretFromServer) {
+                console.error("خطأ: السر (Secret) وصل فارغاً من الجدول!");
+                alert("السر غير موجود في الجدول لهذا الطلب.");
+                return;
+            }
+
+            console.log("السر المستخدم للتوليد:", secretFromServer);
+
+            // 2. توليد الكود باستخدام المحرك الاحترافي المصحح
+            const code = generateSteamCode(secretFromServer);
             
+            // 3. عرض النتيجة
             resultDiv.innerText = code;
             resultDiv.style.display = 'block';
-            counterDiv.innerText = "المحاولات المتبقية لهذا الطلب: " + resData.remaining;
+            counterDiv.innerText = "المحاولات المتبقية: " + resData.remaining;
 
         } else if (resData.status === "blocked") {
             alert("عذراً، هذا الطلب استنفد جميع محاولاته.");
-            counterDiv.innerText = "المحاولات المتبقية: 0";
-            resultDiv.style.display = 'none';
         } else {
-            alert("البيانات غير صحيحة، تأكد من رقم الطلب واسم المستخدم.");
-            resultDiv.style.display = 'none';
+            alert("بيانات غير صحيحة أو غير موجودة.");
         }
     } catch (e) {
         console.error("Error:", e);
-        alert("حدث خطأ في الاتصال بالخادم.");
+        alert("فشل الاتصال بالسيرفر.");
     }
 }
 
 /**
- * دالة تحويل Hex إلى بايتات (مطلوبة لمحركك الاحترافي)
- */
-function hexToBytes(hex) {
-    let bytes = [];
-    for (let c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
-    return bytes;
-}
-
-/**
- * محرك التصنيع (نسخة طبق الأصل من كودك الاحترافي)
+ * دالة التصنيع الاحترافية - مطابقة لـ Steam Desktop Authenticator
  */
 function generateSteamCode(secretB64) {
     try {
-        // 1. حساب الوقت (ثابت ما فيه مشكلة)
+        // حساب الوقت بصيغة 30 ثانية
         const epoch = Math.floor(Date.now() / 1000);
         const timeCount = Math.floor(epoch / 30);
 
-        // 2. التصحيح الجوهري: تحويل الوقت مباشرة إلى WordArray (8 بايتات)
-        // الطريقة هذي تضمن إن CryptoJS يفهم إننا نرسل 64-بت بترتيب ستيم الصحيح
+        // تحويل الوقت لـ 64-bit WordArray (هنا السر في المطابقة)
         let timeWords = CryptoJS.lib.WordArray.create([0, timeCount]); 
 
-        // 3. فك تشفير السر (Base64) - ثابت
+        // فك تشفير السر من Base64
         let key = CryptoJS.enc.Base64.parse(secretB64);
 
-        // 4. تطبيق HMAC-SHA1
+        // حساب HMAC-SHA1
         let hmac = CryptoJS.HmacSHA1(timeWords, key);
-        
-        // 5. استخراج البايتات (التحويل اليدوي اللي في كودك صح بس هذي أضمن)
         let hmacSig = hmac.toString(CryptoJS.enc.Hex);
+
+        // تحويل الـ Hex إلى مصفوفة بايتات
         let h = [];
         for (let c = 0; c < hmacSig.length; c += 2) {
             h.push(parseInt(hmacSig.substr(c, 2), 16));
         }
 
-        // 6. التقطيع الديناميكي (Dynamic Truncation) - منطقك هنا سليم 100%
+        // التقطيع الديناميكي (Dynamic Truncation)
         let start = h[19] & 0xf;
         let fullCode = ((h[start] & 0x7f) << 24) | 
                        ((h[start+1] & 0xff) << 16) | 
                        ((h[start+2] & 0xff) << 8) | 
                        (h[start+3] & 0xff);
 
-        // 7. التحويل إلى أبجدية Steam (الـ 26 حرف)
+        // تحويل الرقم إلى حروف Steam (26 حرف)
         const chars = "23456789BCDFGHJKMNPQRTVWXY";
         let finalCode = "";
         for (let i = 0; i < 5; i++) {
@@ -96,10 +94,12 @@ function generateSteamCode(secretB64) {
             fullCode = Math.floor(fullCode / 26);
         }
 
-        console.log("الكود الناتج عن التصنيع (المصحح):", finalCode);
+        console.log("وقت التوليد (Epoch):", epoch);
+        console.log("الكود الناتج:", finalCode);
         return finalCode;
+
     } catch (e) {
-        console.error("خطأ في التصنيع:", e);
+        console.error("Generator Error:", e);
         return "ERROR";
     }
 }
