@@ -4,7 +4,7 @@ script.src = "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.m
 document.head.appendChild(script);
 
 // رابط السكريبت الخاص بك (تأكد من عمل Deploy جديد عند تغيير كود جوجل)
-const scriptURL = "https://script.google.com/macros/s/AKfycbzLPN_i62lQh621x-cHFJbcnckN1D5O8sLEdvwkPgGoNddO2xZEb9yUXpld7F9oc-r4_Q/exec"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycbwfDsIu-vifjn1j_2Dxim5BMpnRUPXGtIUWN72S018-ARRtPm7r8hHduYztY_4SQhtPDA/exec"; 
 
 async function processRequest() {
     const orderID = document.getElementById('orderID').value.trim();
